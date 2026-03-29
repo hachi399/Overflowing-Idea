@@ -29,6 +29,8 @@ export interface TranslationStrings {
   visualizeIdea: string;
   connectingNeurons: string;
   seedLabel: string;
+  error: string;
+  dismiss: string;
 }
 
 export const translations: Record<LanguageCode, TranslationStrings> = {
@@ -61,6 +63,10 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
     visualizeIdea: "Visualize your idea with AI",
     connectingNeurons: "Connecting neurons and associations",
     seedLabel: "Seed",
+    error: "Error",
+    dismiss: "Dismiss",
+    error: "Error",
+    dismiss: "Dismiss",
   },
   ja: {
     appTitle: "Overflowing Idea",
@@ -91,5 +97,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
     visualizeIdea: "AIでアイディアを視覚化",
     connectingNeurons: "ニューロンと連想を接続中",
     seedLabel: "シード",
+    error: "エラー",
+    dismiss: "閉じる",
   }
 };

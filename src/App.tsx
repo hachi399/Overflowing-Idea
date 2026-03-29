@@ -411,6 +411,7 @@ export default function App() {
   const [loadingConcept, setLoadingConcept] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
   const [loadingDoc, setLoadingDoc] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const [language, setLanguage] = useState<LanguageCode>('en');
   const t = translations[language];
@@ -448,6 +449,7 @@ export default function App() {
     setLoading(true);
     setConcept(null);
     setSelectedKeywords([]);
+    setErrorMessage(null);
     try {
       const result = await generateMindMap(newSeed, level);
       setNodes(result.nodes);
@@ -455,6 +457,7 @@ export default function App() {
       setSeed(newSeed);
     } catch (error) {
       console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
@@ -471,12 +474,14 @@ export default function App() {
   const handleGenerateConcept = async () => {
     if (selectedKeywords.length === 0) return;
     setLoadingConcept(true);
+    setErrorMessage(null);
     try {
       const result = await generateConcept(seed, selectedKeywords);
       setConcept(result);
       saveToHistory(result);
     } catch (error) {
       console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setLoadingConcept(false);
     }
@@ -485,6 +490,7 @@ export default function App() {
   const handleGenerateImage = async () => {
     if (!concept) return;
     setLoadingImage(true);
+    setErrorMessage(null);
     try {
       const imageUrl = await generateConceptImage(concept);
       if (imageUrl) {
@@ -499,6 +505,7 @@ export default function App() {
       }
     } catch (error) {
       console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setLoadingImage(false);
     }
@@ -507,6 +514,7 @@ export default function App() {
   const handleGenerateDoc = async () => {
     if (!concept) return;
     setLoadingDoc(true);
+    setErrorMessage(null);
     try {
       const requirements = await generateRequirementsDoc(concept);
       const updatedConcept = { ...concept, requirements };
@@ -519,6 +527,7 @@ export default function App() {
       localStorage.setItem('overflowing_idea_history', JSON.stringify(updatedHistory));
     } catch (error) {
       console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setLoadingDoc(false);
     }
@@ -588,6 +597,27 @@ export default function App() {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Header darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} t={t} />
+            
+            {errorMessage && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+              >
+                <div className="flex items-center gap-2">
+                  <X className="text-red-600 dark:text-red-400" size={20} />
+                  <p className="text-red-800 dark:text-red-200 font-medium">{t.error || 'Error'}</p>
+                </div>
+                <p className="text-red-700 dark:text-red-300 mt-1">{errorMessage}</p>
+                <button 
+                  onClick={() => setErrorMessage(null)}
+                  className="mt-2 text-sm text-red-600 dark:text-red-400 hover:underline"
+                >
+                  {t.dismiss || 'Dismiss'}
+                </button>
+              </motion.div>
+            )}
             
             <SeedInput onGenerate={handleGenerateMap} loading={loading} t={t} />
 
