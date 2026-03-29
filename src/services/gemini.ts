@@ -2,9 +2,10 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { BusinessConcept, CreativityLevel, LanguageCode, MindNode } from "../types";
 
 let ai: GoogleGenAI | null = null;
+let currentApiKey: string | null = null;
 
 const getAI = (apiKey: string) => {
-  if (!ai || ai.apiKey !== apiKey) {
+  if (!ai || currentApiKey !== apiKey) {
     if (!apiKey) {
       throw new Error("Gemini API key is missing. Please provide a valid API key.");
     }
@@ -12,6 +13,7 @@ const getAI = (apiKey: string) => {
       throw new Error("Invalid Gemini API key format. API key should start with 'AIza'.");
     }
     ai = new GoogleGenAI({ apiKey });
+    currentApiKey = apiKey;
   }
   return ai;
 };
