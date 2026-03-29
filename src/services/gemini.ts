@@ -1,24 +1,26 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { BusinessConcept, CreativityLevel, LanguageCode, MindNode } from "../types";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+let ai: GoogleGenAI | null = null;
 
-if (!apiKey) {
-  console.error("Gemini API key is not configured. Please check your environment variables.");
-  throw new Error("Gemini API key is missing. Ensure VITE_GEMINI_API_KEY is set in your environment.");
-}
+const getAI = (apiKey: string) => {
+  if (!ai || ai.apiKey !== apiKey) {
+    if (!apiKey) {
+      throw new Error("Gemini API key is missing. Please provide a valid API key.");
+    }
+    if (!apiKey.startsWith("AIza")) {
+      throw new Error("Invalid Gemini API key format. API key should start with 'AIza'.");
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+};
 
-if (!apiKey.startsWith("AIza")) {
-  console.error("Invalid Gemini API key format. API key should start with 'AIza'.");
-  throw new Error("Invalid Gemini API key format.");
-}
-
-const ai = new GoogleGenAI({ apiKey });
-
-export const generateMindMap = async (seed: string, level: CreativityLevel): Promise<{ nodes: MindNode[], language: LanguageCode }> => {
+export const generateMindMap = async (seed: string, level: CreativityLevel, apiKey: string): Promise<{ nodes: MindNode[], language: LanguageCode }> => {
   console.log("Generating mind map for seed:", seed, "level:", level);
 
   try {
+    const ai = getAI(apiKey);
     const model = "gemini-3-flash-preview";
     
     const prompt = `Generate a 2-level hierarchical mind map of associated words starting from the seed word: "${seed}".
@@ -99,10 +101,11 @@ export const generateMindMap = async (seed: string, level: CreativityLevel): Pro
   }
 };
 
-export const generateConcept = async (seed: string, keywords: string[]): Promise<BusinessConcept> => {
+export const generateConcept = async (seed: string, keywords: string[], apiKey: string): Promise<BusinessConcept> => {
   console.log("Generating concept for seed:", seed, "keywords:", keywords);
 
   try {
+    const ai = getAI(apiKey);
     const model = "gemini-3-flash-preview";
     
     const prompt = `Create an innovative business concept by combining the seed word "${seed}" and these keywords: ${keywords.join(", ")}.
@@ -169,10 +172,11 @@ export const generateConcept = async (seed: string, keywords: string[]): Promise
   }
 };
 
-export const generateConceptImage = async (concept: BusinessConcept): Promise<string | undefined> => {
+export const generateConceptImage = async (concept: BusinessConcept, apiKey: string): Promise<string | undefined> => {
   console.log("Generating image for concept:", concept.title);
 
   try {
+    const ai = getAI(apiKey);
     const model = "gemini-2.5-flash-image";
     
     const prompt = `A high-quality, professional visualization of this business concept: ${concept.title}. ${concept.summary}. Modern, clean, innovative style.`;
@@ -213,10 +217,11 @@ export const generateConceptImage = async (concept: BusinessConcept): Promise<st
   }
 };
 
-export const generateRequirementsDoc = async (concept: BusinessConcept): Promise<string> => {
+export const generateRequirementsDoc = async (concept: BusinessConcept, apiKey: string): Promise<string> => {
   console.log("Generating requirements document for concept:", concept.title);
 
   try {
+    const ai = getAI(apiKey);
     const model = "gemini-3-flash-preview";
     
     const prompt = `Generate a detailed Requirements Definition Document for the following business concept:

@@ -412,6 +412,8 @@ export default function App() {
   const [loadingImage, setLoadingImage] = useState(false);
   const [loadingDoc, setLoadingDoc] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState<string>("");
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   
   const [language, setLanguage] = useState<LanguageCode>('en');
   const t = translations[language];
@@ -422,11 +424,20 @@ export default function App() {
   const [concept, setConcept] = useState<BusinessConcept | null>(null);
   const [history, setHistory] = useState<IdeaHistory[]>([]);
 
-  // Load history
+  // Load history and API key
   useEffect(() => {
     const saved = localStorage.getItem('overflowing_idea_history');
     if (saved) {
       setHistory(JSON.parse(saved));
+    }
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const savedApiKey = localStorage.getItem('gemini_api_key');
+    if (envApiKey && envApiKey !== 'your_api_key_here') {
+      setApiKey(envApiKey);
+    } else if (savedApiKey) {
+      setApiKey(savedApiKey);
+    } else {
+      setShowApiKeyInput(true);
     }
   }, []);
 
@@ -445,13 +456,25 @@ export default function App() {
     localStorage.setItem('overflowing_idea_history', JSON.stringify(newHistory));
   };
 
+  const handleSaveApiKey = (key: string) => {
+    setApiKey(key);
+    localStorage.setItem('gemini_api_key', key);
+    setShowApiKeyInput(false);
+    setErrorMessage(null);
+  };
+
   const handleGenerateMap = async (newSeed: string, level: CreativityLevel) => {
+    if (!apiKey) {
+      setErrorMessage("Please set your Gemini API key first.");
+      setShowApiKeyInput(true);
+      return;
+    }
     setLoading(true);
     setConcept(null);
     setSelectedKeywords([]);
     setErrorMessage(null);
     try {
-      const result = await generateMindMap(newSeed, level);
+      const result = await generateMindMap(newSeed, level, apiKey);
       setNodes(result.nodes);
       setLanguage(result.language);
       setSeed(newSeed);
@@ -472,11 +495,16 @@ export default function App() {
   };
 
   const handleGenerateConcept = async () => {
+    if (!apiKey) {
+      setErrorMessage("Please set your Gemini API key first.");
+      setShowApiKeyInput(true);
+      return;
+    }
     if (selectedKeywords.length === 0) return;
     setLoadingConcept(true);
     setErrorMessage(null);
     try {
-      const result = await generateConcept(seed, selectedKeywords);
+      const result = await generateConcept(seed, selectedKeywords, apiKey);
       setConcept(result);
       saveToHistory(result);
     } catch (error) {
@@ -488,11 +516,16 @@ export default function App() {
   };
 
   const handleGenerateImage = async () => {
+    if (!apiKey) {
+      setErrorMessage("Please set your Gemini API key first.");
+      setShowApiKeyInput(true);
+      return;
+    }
     if (!concept) return;
     setLoadingImage(true);
     setErrorMessage(null);
     try {
-      const imageUrl = await generateConceptImage(concept);
+      const imageUrl = await generateConceptImage(concept, apiKey);
       if (imageUrl) {
         const updatedConcept = { ...concept, imageUrl };
         setConcept(updatedConcept);
@@ -512,11 +545,16 @@ export default function App() {
   };
 
   const handleGenerateDoc = async () => {
+    if (!apiKey) {
+      setErrorMessage("Please set your Gemini API key first.");
+      setShowApiKeyInput(true);
+      return;
+    }
     if (!concept) return;
     setLoadingDoc(true);
     setErrorMessage(null);
     try {
-      const requirements = await generateRequirementsDoc(concept);
+      const requirements = await generateRequirementsDoc(concept, apiKey);
       const updatedConcept = { ...concept, requirements };
       setConcept(updatedConcept);
       // Update history
@@ -597,6 +635,45 @@ export default function App() {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Header darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} t={t} />
+            
+            {showApiKeyInput && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-6 glass-card"
+              >
+                <h3 className="text-lg font-semibold mb-4">{t.apiKeyRequired || 'Gemini API Key Required'}</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  {t.apiKeyDescription || 'Please enter your Gemini API key to use AI features. Get your key from Google AI Studio.'}
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    placeholder="AIza..."
+                    className="flex-1 p-3 rounded-lg border-2 border-slate-200 dark:border-slate-800 bg-transparent focus:border-blue-500 outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                        handleSaveApiKey(e.currentTarget.value.trim());
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const input = document.querySelector('input[type="password"]') as HTMLInputElement;
+                      if (input?.value.trim()) {
+                        handleSaveApiKey(input.value.trim());
+                      }
+                    }}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {t.save || 'Save'}
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  {t.apiKeyNote || 'Your API key is stored locally in your browser and never sent to our servers.'}
+                </p>
+              </motion.div>
+            )}
             
             {errorMessage && (
               <motion.div 

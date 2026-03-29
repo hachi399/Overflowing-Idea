@@ -31,6 +31,10 @@ export interface TranslationStrings {
   seedLabel: string;
   error: string;
   dismiss: string;
+  apiKeyRequired: string;
+  apiKeyDescription: string;
+  apiKeyNote: string;
+  save: string;
 }
 
 export const translations: Record<LanguageCode, TranslationStrings> = {
@@ -65,6 +69,10 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
     seedLabel: "Seed",
     error: "Error",
     dismiss: "Dismiss",
+    apiKeyRequired: "Gemini API Key Required",
+    apiKeyDescription: "Please enter your Gemini API key to use AI features. Get your key from Google AI Studio.",
+    apiKeyNote: "Your API key is stored locally in your browser and never sent to our servers.",
+    save: "Save",
     error: "Error",
     dismiss: "Dismiss",
   },
@@ -99,5 +107,9 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
     seedLabel: "シード",
     error: "エラー",
     dismiss: "閉じる",
+    apiKeyRequired: "Gemini APIキーが必要です",
+    apiKeyDescription: "AI機能を使用するにはGemini APIキーを入力してください。Google AI Studioから取得できます。",
+    apiKeyNote: "APIキーはブラウザのローカルストレージに保存され、当社サーバーに送信されることはありません。",
+    save: "保存",
   }
 };
