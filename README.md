@@ -19,9 +19,15 @@ View your app in AI Studio: https://ai.studio/apps/9d2543f3-9893-4e0f-a113-ede0f
 3. Run the app:
    `npm run dev`
 
+> Local dev runs at `http://localhost:3000/`.
+
 ## Deploy to GitHub Pages
 
 1. Ensure the repo is pushed to GitHub on the `main` branch.
-2. The workflow in `.github/workflows/gh-pages.yml` builds and deploys on every push to `main`.
-3. You can also deploy locally with:
+2. GitHub Pages should be configured to publish from the `gh-pages` branch.
+3. The workflow in `.github/workflows/gh-pages.yml` builds and deploys on every push to `main`.
+4. You can also deploy locally with:
    `npm run deploy`
+
+Your published site will be available at:
+`https://hachi399.github.io/Overflowing-Idea/`

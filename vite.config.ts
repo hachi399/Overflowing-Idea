@@ -10,7 +10,7 @@ export default defineConfig(({mode}) => {
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
-    base: '/Overflowing-Idea/',
+    base: mode === 'production' ? '/Overflowing-Idea/' : '/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { BusinessConcept, CreativityLevel, LanguageCode, MindNode } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || "" });
 
 export const generateMindMap = async (seed: string, level: CreativityLevel): Promise<{ nodes: MindNode[], language: LanguageCode }> => {
   const model = "gemini-3-flash-preview";
